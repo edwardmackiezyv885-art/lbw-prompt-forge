@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Forge · 长对话不漂移的提示词生成器 | LBW API</title>
+<meta name="description" content="用 AI 生成提示词，而不是模板拼接。五种模式覆盖角色锚定、长对话压缩、跑偏纠回、场景定制、问题诊断。生成的提示词不绑定具体模型，可直接用于任何 AI 客户端。">
+<meta name="keywords" content="提示词生成器,prompt生成器,system prompt,长上下文,角色锚定,对话压缩,提示词工程,prompt engineering">
+<meta name="author" content="LBW API 评测中心">
+<link rel="canonical" href="https://lbwapi.online/tools/prompt-forge.html">
+<link rel="alternate" hreflang="zh-CN" href="https://lbwapi.online/tools/prompt-forge.html">
+<link rel="alternate" hreflang="x-default" href="https://lbwapi.online/tools/prompt-forge.html">
+
+<meta property="og:title" content="Prompt Forge · 长对话不漂移的提示词生成器">
+<meta property="og:description" content="五种模式：角色锚定、长对话压缩、跑偏纠回、场景定制、问题诊断。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:url" content="https://lbwapi.online/tools/prompt-forge.html">
+<meta property="og:image" content="https://lbwapi.online/assets/img/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+<link rel="stylesheet" href="/assets/tailwind-base.css">
+<link rel="stylesheet" href="/assets/fa/css/font-awesome.min.css?v=2">
+<link rel="stylesheet" href="../assets/style.css?v=20261106">
+<script src="../assets/config.js?v=20261106"></script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Prompt Forge","url":"https://lbwapi.online/tools/prompt-forge.html","applicationCategory":"DeveloperApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"CNY"},"description":"用 AI 生成提示词，支持角色锚定、长对话压缩、跑偏纠回等五种模式。"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Prompt Forge 和普通提示词生成器有什么区别？","acceptedAnswer":{"@type":"Answer","text":"普通生成器是模板拼接，只能产出固定几段话；Prompt Forge 调用大模型按你的具体需求现写，输出的是针对你这一个任务的定制提示词。"}},
+{"@type":"Question","name":"为什么要做长对话压缩？","acceptedAnswer":{"@type":"Answer","text":"对话越长，模型越容易忘记最初的角色设定，开始跑偏或拒绝。压缩模式会把前面的关键结论、已排除方案、当前进度提炼成一段可替换历史的快照，让模型无缝续接。"}},
+{"@type":"Question","name":"生成的提示词绑定特定模型吗？","acceptedAnswer":{"@type":"Answer","text":"不绑定。生成的提示词里不会出现具体模型名称，也没有针对某家模型的特化语法，可以直接贴进任何 AI 客户端。"}},
+{"@type":"Question","name":"这个工具收费吗？","acceptedAnswer":{"@type":"Answer","text":"免费使用，不需要注册。每个 IP 有频率限制以防止滥用。"}}
+]}
+</script>
+<style>
+.pf-wrap{max-width:980px;margin:0 auto;padding:0 20px}
+.pf-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:28px 0 22px}
+.pf-tab{padding:10px 16px;border:1px solid #e5e7eb;border-radius:9px;background:#fff;cursor:pointer;font-size:14px;font-weight:600;color:#4b5563;transition:.15s}
+.pf-tab:hover{border-color:#c7d2fe;color:#1f2937}
+.pf-tab.on{background:#1f2937;border-color:#1f2937;color:#fff}
+.pf-panel{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:22px}
+.pf-label{display:block;font-size:13px;font-weight:700;color:#374151;margin:0 0 8px}
+.pf-hint{font-size:12.5px;color:#6b7280;margin:0 0 10px;line-height:1.6}
+.pf-input,.pf-textarea{width:100%;border:1px solid #d1d5db;border-radius:9px;padding:12px 14px;font-size:14px;font-family:inherit;line-height:1.65;color:#111827;background:#fff;box-sizing:border-box}
+.pf-textarea{min-height:110px;resize:vertical}
+.pf-input:focus,.pf-textarea:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+.pf-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0}
+@media(max-width:640px){.pf-row{grid-template-columns:1fr}}
+.pf-actions{display:flex;gap:12px;align-items:center;margin-top:20px;flex-wrap:wrap}
+.pf-btn{padding:12px 24px;border-radius:9px;border:none;background:#1f2937;color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;transition:.15s}
+.pf-btn:hover:not(:disabled){background:#111827;transform:translateY(-1px)}
+.pf-btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.pf-btn2{padding:12px 20px;border-radius:9px;border:1px solid #d1d5db;background:#fff;color:#374151;font-size:14px;font-weight:600;cursor:pointer}
+.pf-btn2:hover{background:#f9fafb}
+.pf-status{font-size:13px;color:#6b7280;margin-left:4px}
+.pf-out{margin-top:22px;display:none}
+.pf-out.on{display:block}
+.pf-out-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:10px}
+.pf-out-title{font-size:14px;font-weight:750;color:#111827}
+.pf-out-meta{font-size:12.5px;color:#6b7280}
+.pf-pre{background:#0f172a;color:#e2e8f0;border-radius:10px;padding:20px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.75;white-space:pre-wrap;word-break:break-word;max-height:560px;overflow:auto;margin:0}
+.pf-err{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;border-radius:9px;padding:12px 16px;font-size:13.5px;margin-top:16px;display:none}
+.pf-err.on{display:block}
+.pf-tip{background:#eff6ff;border-left:3px solid #2563eb;border-radius:0 8px 8px 0;padding:14px 18px;margin:22px 0;font-size:13.5px;color:#1e3a8a;line-height:1.7}
+.pf-spin{display:inline-block;width:14px;height:14px;border:2px solid #d1d5db;border-top-color:#1f2937;border-radius:50%;animation:pfs .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes pfs{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/"><span class="brand-mark">L</span><span class="brand-text">LBW API<em>评测中心</em></span></a>
+    <nav class="nav">
+      <a href="/">首页</a>
+      <a href="/reviews/">评测报告</a>
+      <a href="/tutorials/">接入教程</a>
+      <a href="/blog/">博客</a>
+      <a href="/tools/" class="active">工具</a><a href="/buy/">充值</a><a href="/about.html">关于</a>
+    </nav>
+    <div class="header-actions">
+      <a class="search-btn" href="/search.html" aria-label="站内搜索"><i class="fa fa-search"></i></a>
+      <a class="lang-switch" href="/en/" title="English version">EN</a>
+      <a class="btn btn-dark btn-sm" href="https://lbwapishop.online/register" target="_blank" rel="noopener">免费注册</a>
+      <button id="menuBtn" class="menu-btn" aria-label="菜单">☰</button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="mobile-menu">
+    <a href="/">首页</a><a href="/reviews/">评测报告</a><a href="/tutorials/">接入教程</a><a href="/blog/">博客</a><a href="/tools/">工具</a><a href="/about.html">关于</a>
+  </div>
+</header>
+
+<section class="article-hero">
+  <div class="wrap">
+    <div class="crumbs"><a href="/">首页</a><span>/</span><a href="/tools/">工具</a><span>/</span>Prompt Forge</div>
+    <h1>Prompt Forge：为长对话设计的提示词生成器</h1>
+    <p class="article-lede">不是模板拼接。你把需求说清楚，它现场写出一段针对这个任务的提示词——包含角色、边界、输出规范、以及防止对话跑偏的锚定语句。</p>
+  </div>
+</section>
+
+<div class="pf-wrap">
+
+  <div class="pf-tabs" id="tabs">
+    <button class="pf-tab on" data-mode="anchor">角色锚定</button>
+    <button class="pf-tab" data-mode="compress">长对话压缩</button>
+    <button class="pf-tab" data-mode="resume">跑偏纠回</button>
+    <button class="pf-tab" data-mode="scenario">场景定制</button>
+    <button class="pf-tab" data-mode="diagnose">问题诊断</button>
+  </div>
+
+  <div class="pf-panel">
+    <div id="modeDesc" class="pf-tip">
+      <strong>角色锚定</strong>：为长期使用的助手设定身份与规则。适合每天都要开的会话——开头贴一次，后面几十轮都稳。
+    </div>
+
+    <label class="pf-label" for="input">你的需求</label>
+    <p class="pf-hint" id="inputHint">说清楚三件事：这个助手是做什么的、服务谁、输出要什么格式。可以随便写，不用组织语言。</p>
+    <textarea id="input" class="pf-textarea" placeholder="例：我要一个帮我审代码的助手。它只做 code review，不改代码。输出要分「必须改」「建议改」两档，每条带行号和原因。不要夸我代码写得好。"></textarea>
+
+    <div class="pf-row">
+      <div>
+        <label class="pf-label" for="ctx">已有对话 / 上下文（可选）</label>
+        <p class="pf-hint" id="ctxHint">如果对话已经很长、开始跑偏了，把关键片段贴进来，生成结果会针对性处理。</p>
+        <textarea id="ctx" class="pf-textarea" style="min-height:88px" placeholder="粘贴对话片段、或者你之前用过的提示词"></textarea>
+      </div>
+      <div>
+        <label class="pf-label" for="tone">输出风格</label>
+        <p class="pf-hint">影响生成出来的提示词的措辞强度。</p>
+        <select id="tone" class="pf-input">
+          <option value="precise">精确克制（推荐）</option>
+          <option value="strict">强约束</option>
+          <option value="friendly">自然友好</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="pf-actions">
+      <button id="genBtn" class="pf-btn">生成提示词</button>
+      <button id="clearBtn" class="pf-btn2">清空</button>
+      <span id="status" class="pf-status"></span>
+    </div>
+
+    <div id="errBox" class="pf-err"></div>
+
+    <div id="outBox" class="pf-out">
+      <div class="pf-out-head">
+        <span class="pf-out-title">生成结果</span>
+        <span class="pf-out-meta" id="outMeta"></span>
+      </div>
+      <pre id="outPre" class="pf-pre"></pre>
+      <div class="pf-actions">
+        <button id="copyBtn" class="pf-btn2">复制全文</button>
+        <button id="againBtn" class="pf-btn2">换个写法再生成</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pf-tip" style="margin-top:26px">
+    <strong>为什么长对话会失效？</strong><br>
+    模型没有真正的“记忆”。每轮对话都是把全部历史重新读一遍。历史越长，最初的角色设定在注意力里的权重越低，于是它开始忘记边界、输出变松、甚至拒绝本来能做的工作。<br>
+    解法不是“再强调一遍”，而是在上下文快满时，用「长对话压缩」把历史换成一段信息密度更高的状态快照——目标、已定事实、已排除方案、当前进度、下一步，五项齐了，模型就能无缝续接。
+  </div>
+
+  <div style="margin:34px 0 60px;padding-top:22px;border-top:1px solid #e5e7eb;font-size:13.5px;color:#6b7280;line-height:1.8">
+    <strong style="color:#374151">相关工具</strong><br>
+    <a href="/tools/">全部工具</a> ·
+    <a href="/tools/prompt-generator.html">经典版提示词生成器</a> ·
+    <a href="/tutorials/">接入教程</a> ·
+    <a href="/blog/">实测博客</a>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <p>© 2026 LBW API 评测中心 · <a href="/about.html">关于</a> · <a href="/tools/">工具</a></p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var MODES = {
+    anchor: {
+      desc: '<strong>角色锚定</strong>：为长期使用的助手设定身份与规则。适合每天都要开的会话——开头贴一次，后面几十轮都稳。',
+      hint: '说清楚三件事：这个助手是做什么的、服务谁、输出要什么格式。可以随便写，不用组织语言。',
+      ph: '例：我要一个帮我审代码的助手。它只做 code review，不改代码。输出要分「必须改」「建议改」两档，每条带行号和原因。不要夸我代码写得好。'
+    },
+    compress: {
+      desc: '<strong>长对话压缩</strong>：把已有历史提炼成状态快照。上下文快满时用它替换旧记录，模型能无缝接着干，不会忘了之前在做什么。',
+      hint: '在「已有对话」里贴一段现在的对话，或者在需求里说明这个任务的目标和进展。',
+      ph: '例：我在让 AI 帮我重构一个 Python 项目，已经确定了用 asyncio 不用线程池，也排除了 ORM 改用原生 SQL。现在做到一半，需要一份能续接的快照。'
+    },
+    resume: {
+      desc: '<strong>跑偏纠回</strong>：对话开始拒绝、跑题、格式乱掉时用。生成一段注入指令，把它拉回原来的角色。',
+      hint: '描述一下怎么跑偏的，以及你希望它回到什么状态。',
+      ph: '例：本来在帮我写小说，写了十几轮之后它开始说"我不能继续这个情节"。我要它回到正常创作状态，继续写下去。'
+    },
+    scenario: {
+      desc: '<strong>场景定制</strong>：针对具体任务生成专用提示词，带处理步骤和质量标准。适合一次性任务。',
+      hint: '描述任务本身：要产出什么、输入是什么、什么样算合格。',
+      ph: '例：帮我做一个竞品分析报告。输入是三到五家公司的官网信息，输出要有功能对比表、定价对比、优劣势判断，最后给出选型建议。'
+    },
+    diagnose: {
+      desc: '<strong>问题诊断</strong>：把你现在用的提示词贴进来，它先指出问题，再给出改写版。适合已经写好了但效果不好的情况。',
+      hint: '在下面贴入你正在用的提示词，或者在「已有对话」里贴。',
+      ph: '例：我用的提示词是"你是一个专业的助手，请认真回答我的问题"，但发现它经常答得很敷衍。'
+    }
+  };
+
+  var tabs = document.getElementById('tabs');
+  var mode = 'anchor';
+  var modeDesc = document.getElementById('modeDesc');
+  var inputHint = document.getElementById('inputHint');
+  var inputEl = document.getElementById('input');
+  var ctxEl = document.getElementById('ctx');
+  var toneEl = document.getElementById('tone');
+  var genBtn = document.getElementById('genBtn');
+  var clearBtn = document.getElementById('clearBtn');
+  var statusEl = document.getElementById('status');
+  var errBox = document.getElementById('errBox');
+  var outBox = document.getElementById('outBox');
+  var outPre = document.getElementById('outPre');
+  var outMeta = document.getElementById('outMeta');
+  var copyBtn = document.getElementById('copyBtn');
+  var againBtn = document.getElementById('againBtn');
+  var busy = false;
+
+  function setMode(m){
+    mode = m;
+    var cfg = MODES[m] || MODES.anchor;
+    modeDesc.innerHTML = cfg.desc;
+    inputHint.textContent = cfg.hint;
+    inputEl.placeholder = cfg.ph;
+    Array.prototype.forEach.call(tabs.querySelectorAll('.pf-tab'), function(b){
+      b.classList.toggle('on', b.getAttribute('data-mode') === m);
+    });
+    hideErr();
+  }
+
+  tabs.addEventListener('click', function(e){
+    var b = e.target.closest('.pf-tab');
+    if (b) setMode(b.getAttribute('data-mode'));
+  });
+
+  function showErr(msg){
+    errBox.textContent = msg;
+    errBox.classList.add('on');
+  }
+  function hideErr(){ errBox.classList.remove('on'); }
+
+  function setBusy(on){
+    busy = on;
+    genBtn.disabled = on;
+    againBtn.disabled = on;
+    statusEl.innerHTML = on ? '<span class="pf-spin"></span>正在生成，通常 10-30 秒…' : '';
+  }
+
+  function generate(){
+    if (busy) return;
+    hideErr();
+    var input = inputEl.value.trim();
+    if (!input){ showErr('请先填写需求描述'); inputEl.focus(); return; }
+
+    setBusy(true);
+    outBox.classList.remove('on');
+
+    fetch('/api/prompt.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        mode: mode,
+        input: input,
+        context: ctxEl.value.trim(),
+        tone: toneEl.value,
+        lang: 'zh'
+      })
+    }).then(function(r){
+      return r.json().catch(function(){ throw new Error('服务返回异常（HTTP ' + r.status + '）'); });
+    }).then(function(d){
+      if (!d || !d.ok) throw new Error((d && d.error) || '生成失败');
+      outPre.textContent = d.prompt;
+      outMeta.textContent = d.chars + ' 字' + (d.usage && d.usage.total_tokens ? ' · ' + d.usage.total_tokens + ' tokens' : '');
+      outBox.classList.add('on');
+      outBox.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }).catch(function(err){
+      showErr(err.message || '网络错误，请重试');
+    }).finally(function(){
+      setBusy(false);
+    });
+  }
+
+  genBtn.addEventListener('click', generate);
+  againBtn.addEventListener('click', generate);
+
+  clearBtn.addEventListener('click', function(){
+    inputEl.value = '';
+    ctxEl.value = '';
+    outBox.classList.remove('on');
+    hideErr();
+    statusEl.textContent = '';
+    inputEl.focus();
+  });
+
+  copyBtn.addEventListener('click', function(){
+    var text = outPre.textContent;
+    if (!text) return;
+    var done = function(){
+      copyBtn.textContent = '已复制 ✓';
+      setTimeout(function(){ copyBtn.textContent = '复制全文'; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(function(){ fallback(); });
+    } else { fallback(); }
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch(e){ showErr('复制失败，请手动选中'); }
+      document.body.removeChild(ta);
+    }
+  });
+
+  // 支持 ?mode=compress 直达
+  var qs = new URLSearchParams(location.search);
+  if (qs.get('mode') && MODES[qs.get('mode')]) setMode(qs.get('mode'));
+})();
+</script>
+
+<script src="../assets/app.js?v=20261106" defer></script>
+</body>
+</html>
